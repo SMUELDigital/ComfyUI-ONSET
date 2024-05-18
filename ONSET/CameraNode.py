@@ -61,19 +61,10 @@ class CameraNode:
     def execute(self, ISO, Aperture, Shutterspeed, Lens_MM, Sensor_Width, Sensor_Height, Aspect_Ratio, Empty_Latent):
         print(f"Camera settings:\nISO: {ISO}\nAperture: {Aperture}\nShutterspeed: {Shutterspeed}\nLens MM: {Lens_MM}\nSensor Size: {Sensor_Width} x {Sensor_Height}\nAspect Ratio: {Aspect_Ratio}")
         
-        # Create a settings dictionary
-        settings = {
-            "ISO": ISO,
-            "Aperture": Aperture,
-            "Shutterspeed": Shutterspeed,
-            "Lens_MM": Lens_MM,
-            "Sensor_Width": Sensor_Width,
-            "Sensor_Height": Sensor_Height,
-            "Aspect_Ratio": Aspect_Ratio,
-            "Empty_Latent": Empty_Latent
-        }
-        
-        return (settings,)
+        # Modify the latent image based on camera settings (dummy operation)
+        modified_latent = Empty_Latent  # Placeholder for actual modification logic
+
+        return (modified_latent,)
 
     @classmethod
     def IS_CHANGED(s, ISO, Aperture, Shutterspeed, Lens_MM, Sensor_Width, Sensor_Height, Aspect_Ratio, Empty_Latent):
