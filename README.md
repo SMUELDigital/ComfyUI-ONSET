@@ -1,34 +1,58 @@
-# 💫 About Me:
-🔭 I’m currently working on Visual Effects, Game & Video Production Tools<br>👯 I’m looking to collaborate on my repos<br>🤝 I’m looking for help with optimizing my code even more<br>🌱 I’m currently learning python, docker & ML/AI training<br>💬 Ask me about Visual Effects, 3D Asset Creation, Virtual Production & Video Production<br>
-
-
-# 💻 Tech Stack:
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) 
-
-# 📊 GitHub Stats:
-![](https://github-readme-stats.vercel.app/api?username=SMUELDigital&theme=dark&hide_border=false&include_all_commits=true&count_private=true)<br/>
-![](https://github-readme-streak-stats.herokuapp.com/?user=SMUELDigital&theme=dark&hide_border=false)<br/>
-![](https://github-readme-stats.vercel.app/api/top-langs/?username=SMUELDigital&theme=dark&hide_border=false&include_all_commits=true&count_private=true&layout=compact)
-
-## 🏆 GitHub Trophies
-![](https://github-profile-trophy.vercel.app/?username=SMUELDigital&theme=radical&no-frame=false&no-bg=true&margin-w=4)
-
----
-[![](https://visitcount.itsvg.in/api?id=SMUELDigital&icon=0&color=0)](https://visitcount.itsvg.in)
-
-<p><p>
-<a href="https://buymeacoffee.com/smueldigital">
-<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="160" alt="buymeacoffee" />
-</a>
-</p>
-</p>
-
-
 # ComfyUI-ONSET
-The project [ComfyUI-ONSET](https://github.com/SMUELDigital/ComfyUI-ONSET) adds camera settings and some onset tools to ComfyUI. It's a work in progress (WIP) and invites contributions and feedback to develop a standard for these tools. 
 
-![CameraNode](https://github.com/SMUELDigital/ComfyUI-ONSET/assets/114599417/e45b2faf-58be-49d8-b0c5-df753d595dfa) ![CameraNodeOptions](https://github.com/SMUELDigital/ComfyUI-ONSET/assets/114599417/3996ce2c-013f-4d53-b770-72c2faf0f2aa)
+Camera metadata and an operational KSampler for [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
 
+> **Important:** ONSET's camera settings are metadata only. They do **not** physically change diffusion output, apply depth of field, simulate ISO noise, motion blur, or change exposure. The sampler does perform actual diffusion sampling.
 
+## Installation
 
-To adjust your project according to this, you can integrate the camera settings and onset tools features provided, ensuring compatibility with the core ComfyUI functionalities. For more details, refer to the project's [README](https://github.com/SMUELDigital/ComfyUI-ONSET/blob/main/README.md).
+From `ComfyUI/custom_nodes`:
+
+```bash
+git clone https://github.com/SMUELDigital/ComfyUI-ONSET.git
+```
+
+Restart ComfyUI. Nodes appear under **ONSET/Camera** and **ONSET/Sampling**. No additional pip dependencies are required.
+
+## Nodes
+
+### ONSET Camera Metadata (legacy ID: `CameraNode`)
+Inputs: ISO, Aperture (f-number), Shutterspeed, Lens_MM, Sensor_Width, Sensor_Height, Aspect_Ratio, Empty_Latent.
+
+Outputs:
+- `latent`: shallow-copy of the input latent mapping with an `onset_camera` metadata dictionary (latent tensors are unchanged)
+- `camera_json`: JSON string with camera settings and calculations
+- `horizontal_fov`, `vertical_fov`: field of view in degrees
+
+Calculations include shutter duration in seconds, exposure value at ISO 100 (EV100), full-frame-equivalent focal length (by diagonal crop factor), and horizontal/vertical FOV. The aspect-ratio preset is descriptive metadata; it **does not resize** the latent or override the provided sensor dimensions.
+
+### ONSET Camera KSampler (legacy ID: `CameraKSampler`)
+Runs the real ComfyUI `nodes.common_ksampler`, using sampler and scheduler options provided by the installed ComfyUI. Adds `onset_camera` metadata to its output latent. Camera inputs **do not alter** sampling behavior.
+
+For an ordinary text-to-image pipeline:
+
+`CheckpointLoader -> CLIP Text Encode -> ONSET Camera KSampler -> VAE Decode -> Save Image`
+
+Also connect an Empty Latent Image to `latent_image`.
+
+**Compatibility:** Node IDs and the original CameraNode latent input are retained so old workflows can resolve them. CameraNode adds output sockets after its original LATENT output. However, custom nodes that discard nonstandard latent fields may drop the camera metadata; use the JSON output if persistence is required.
+
+## Development
+
+Run the Python tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Integration smoke test: install into an existing ComfyUI, restart it, check that both nodes register, then run a KSampler workflow with a small model. The repository tests do not replace that ComfyUI integration test.
+
+## Roadmap
+
+- Add explicit camera-conditioning or post-processing nodes (depth-aware defocus, noise/exposure simulation, motion blur) rather than implying passive metadata changes pixels.
+- Add image metadata export and opt-in prompt conditioning.
+- Add integration checks against supported ComfyUI releases.
+
+## License
+
+No new license is asserted here; see repository licensing before redistribution.
