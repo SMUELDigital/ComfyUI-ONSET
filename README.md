@@ -56,3 +56,14 @@ Integration smoke test: install into an existing ComfyUI, restart it, check that
 ## License
 
 No new license is asserted here; see repository licensing before redistribution.
+
+### ONSET Camera Prompt (`ONSETCameraPrompt`)
+
+Opt-in text hints for compatible text-conditioning workflows. Connect **Camera Metadata**'s `camera_json` output to `Camera Prompt`'s `camera_json` input. Supply your scene description in `base_prompt`, then route `combined_prompt` into a standard CLIP Text Encode node. The node does not modify latents or images.
+
+- **balanced**: focal length, qualitative lens category, aperture and depth-of-field description.
+- **detailed**: adds ISO, exposure duration, and conditional descriptions of possible grain or motion blur.
+
+These descriptions are artistic guidance, **not** a photographic simulator. Focal-length framing is also influenced by sensor size and composition; the prompt node currently uses the raw focal length as a simple heuristic.
+
+Quick path: `Empty Latent -> ONSET Camera Metadata -> ONSET Camera KSampler -> VAE Decode`; independently, `Camera Metadata.camera_json -> ONSET Camera Prompt -> CLIP Text Encode -> KSampler.positive`. Connect model and negative conditioning as usual.
